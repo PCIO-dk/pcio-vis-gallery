@@ -1,0 +1,218 @@
+/* ================================================================
+   PCIO VIS Gallery — gallery-manage.css
+   Gallery-specific styles layered on the shared members.css.
+   members.css handles the page shell, toolbar, table chrome and
+   empty state — only gallery-specific overrides live here.
+   ================================================================ */
+
+/* ── List: autocreate toggle in the toolbar ──────────────────── */
+.meg-autocreate {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #475569;
+    cursor: pointer;
+    user-select: none;
+    margin-right: auto;
+    padding-left: 4px;
+}
+.meg-autocreate input { margin: 0; }
+.meg-autocreate.is-saving { opacity: .55; }
+
+/* ── List: cover thumbnail in the title cell ─────────────────── */
+.me-cell-name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.meg-row-thumb {
+    width: 38px;
+    height: 38px;
+    object-fit: cover;
+    border-radius: 6px;
+    flex-shrink: 0;
+    border: 1px solid #e2e8f0;
+}
+.meg-row-thumb--empty {
+    background: #f1f5f9;
+    border: 1px dashed #cbd5e1;
+    display: inline-block;
+}
+
+/* ── List: column widths ─────────────────────────────────────── */
+#me-table { table-layout: fixed; }
+#me-table th:nth-child(1), #me-table td:nth-child(1) { width: 58px; }
+#me-table th:nth-child(2), #me-table td:nth-child(2) { width: 128px; }
+#me-table th:nth-child(4), #me-table td:nth-child(4) { width: 170px; }
+#me-table th:nth-child(5), #me-table td:nth-child(5) { width: 72px; }
+#me-table th:nth-child(6), #me-table td:nth-child(6) { width: 148px; }
+#me-table th:nth-child(7), #me-table td:nth-child(7) { width: 128px; }
+#me-table th:nth-child(8), #me-table td:nth-child(8) { width: 96px; }
+
+/* ── List: visibility badge colours ─────────────────────────── */
+.meg-vis-public       { background: #dcfce7; color: #166534; }
+.meg-vis-logged-in    { background: #dbeafe; color: #1e40af; }
+.meg-vis-participants { background: #fef9c3; color: #854d0e; }
+.meg-vis-roles        { background: #f3e8ff; color: #6b21a8; }
+
+/* ── Edit: generic small helper text ────────────────────────── */
+.me-form-hint {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: #64748b;
+}
+
+/* ── Edit: cover preview (General tab) ──────────────────────── */
+.meg-cover {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 160px;
+    min-height: 100px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    background: #f8fafc;
+    overflow: hidden;
+}
+.meg-cover-preview {
+    display: block;
+    max-width: 240px;
+    max-height: 160px;
+    object-fit: cover;
+}
+.meg-cover-none {
+    color: #94a3b8;
+    font-size: 13px;
+    padding: 24px;
+}
+
+/* ── Edit: role checkboxes (Permissions tab) ─────────────────── */
+.meg-roles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+}
+.meg-role {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #334155;
+    cursor: pointer;
+}
+.meg-role input { margin: 0; }
+
+/* ── Edit: photo grid (Photos tab) ──────────────────────────── */
+.meg-photos-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+.meg-photo-grid {
+    display: grid;
+    grid-template-columns: repeat( auto-fill, minmax( 180px, 1fr ) );
+    gap: 14px;
+}
+
+.meg-photo {
+    position: relative;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #fff;
+    padding: 8px;
+    box-shadow: 0 1px 2px rgba( 15, 23, 42, .04 );
+    cursor: grab;
+}
+.meg-photo:active { cursor: grabbing; }
+
+.meg-photo img {
+    display: block;
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+.meg-photo .meg-caption {
+    width: 100%;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.meg-photo-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.meg-cover-badge,
+.meg-pending {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    padding: 4px 7px;
+    border-radius: 999px;
+    color: #fff;
+    z-index: 2;
+}
+.meg-cover-badge { background: #2563eb; }
+.meg-pending {
+    left: auto;
+    right: 12px;
+    background: #d97706;
+}
+
+/* SVG sizing for the star/cover icon button */
+.me-icon-btn.meg-cover-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    stroke: none;
+}
+
+/* ── Edit: video item — dark placeholder when no poster was generated ── */
+.meg-video-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 140px;
+    background: #1e293b;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    color: rgba( 255, 255, 255, 0.7 );
+    font-size: 32px;
+}
+
+/* ── Edit: poster picker button (visible on video cards only) ─── */
+.meg-poster-btn {
+    display: block;
+    width: 100%;
+    margin-bottom: 6px;
+    padding: 4px 8px;
+    font-size: 12px;
+    text-align: center;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    color: #334155;
+    cursor: pointer;
+}
+.meg-poster-btn:hover {
+    background: #e2e8f0;
+}
+
+/* ── Edit: Quill editor ──────────────────────────────────────── */
+#meg-quill { background: #fff; }
+#meg-quill .ql-editor {
+    min-height: 140px;
+    font-size: 14px;
+}
