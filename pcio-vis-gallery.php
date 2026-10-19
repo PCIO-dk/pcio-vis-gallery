@@ -3,7 +3,7 @@
 Plugin Name:  PCIO VIS Gallery
 Plugin URI:   https://www.pcio.dk/
 Description:  Adds event-linked photo galleries to PCIO VIS Member Event. Galleries store images as standard WordPress Media Library attachments and can be embedded with [pcio_me_gallery id="N"] or browsed at /vis/galleries/.
-Version:      1.0.0
+Version:      1.1.0
 Author:       PCIO
 Author URI:   https://www.pcio.dk
 Requires at least: 6.2
@@ -44,6 +44,7 @@ class PCIO_VIS_Gallery_Plugin {
     public static function register(): void {
         add_action( 'init',          [ 'PCIO_VIS_Gallery_DB', 'install' ] );
         add_action( 'rest_api_init', [ __CLASS__, 'register_rest'   ] );
+        add_filter( 'pcio_me_history_tables', [ 'PCIO_VIS_Gallery_DB', 'register_history_tables' ] );
 
         ( new PCIO_VIS_Gallery_Frontend() )->register();
         ( new PCIO_VIS_Gallery_Integration() )->register();

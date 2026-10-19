@@ -174,7 +174,7 @@ class PCIO_VIS_Gallery_Integration {
         }
         $items['galleries'] = [
             'label' => __( 'Galleries', 'pcio-vis-gallery' ),
-            'url'   => home_url( 'vis/galleries/' ),
+            'url'   => current_user_can( 'vis_gallery_manage' ) ? home_url( 'vis/galleries/manage/' ) : home_url( 'vis/galleries/' ),
         ];
         return $items;
     }

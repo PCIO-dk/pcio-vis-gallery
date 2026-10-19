@@ -105,6 +105,7 @@
                 '<h1 class="me-page-title">' + escHtml( T.pageTitle ) + '</h1>' +
                 '<div class="me-header-right">' +
                     '<span class="me-member-count" id="meg-count"></span>' +
+                    '<a class="me-btn me-btn-secondary" href="' + escAttr( CFG.viewBase ) + '">' + escHtml( T.viewGalleries ) + '</a>' +
                     '<button class="me-btn me-btn-primary" id="meg-btn-new">' + escHtml( T.newGallery ) + '</button>' +
                 '</div>' +
             '</div>' +

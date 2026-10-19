@@ -130,7 +130,7 @@ class PCIO_VIS_Gallery_Frontend {
 
         $assets = plugins_url( 'assets/', PCIO_VIS_GALLERY_FILE );
         // Base member-list styling (shared with the core /vis/ pages).
-        wp_enqueue_style( 'pcio-me-app', plugins_url( 'assets/members.css', PCIO_VIS_PLUGIN_FILE ), [], '1.0.1' );
+        wp_enqueue_style( 'pcio-me-app', plugins_url( 'assets/members.css', PCIO_VIS_PLUGIN_FILE ), [], '1.4.0' );
         wp_enqueue_style( 'pcio-meg-manage', $assets . 'gallery-manage.css', [ 'pcio-me-app' ], '1.1.0' );
 
         if ( $view === 'edit' ) {
@@ -151,7 +151,7 @@ class PCIO_VIS_Gallery_Frontend {
             wp_add_inline_script( 'pcio-meg-edit', 'window.PCIO_MEG = ' . wp_json_encode( $config ) . ';', 'before' );
             $template = PCIO_VIS_GALLERY_DIR . 'templates/manage-edit.php';
         } else {
-            wp_enqueue_script( 'pcio-meg-list', $assets . 'gallery-manage.js', [], '1.1.2', true );
+            wp_enqueue_script( 'pcio-meg-list', $assets . 'gallery-manage.js', [], '1.1.3', true );
             $config         = $this->manage_config();
             $config['view'] = 'list';
             wp_add_inline_script( 'pcio-meg-list', 'window.PCIO_MEG = ' . wp_json_encode( $config ) . ';', 'before' );
@@ -198,6 +198,7 @@ class PCIO_VIS_Gallery_Frontend {
         return [
             // List
             'pageTitle'      => __( 'Galleries', 'pcio-vis-gallery' ),
+            'viewGalleries'  => __( 'View galleries', 'pcio-vis-gallery' ),
             'newGallery'     => __( '+ New gallery', 'pcio-vis-gallery' ),
             'newGalleryTitle'=> __( 'Untitled gallery', 'pcio-vis-gallery' ),
             'colId'          => __( 'ID', 'pcio-vis-gallery' ),

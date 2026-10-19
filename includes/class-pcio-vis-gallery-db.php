@@ -50,6 +50,56 @@ class PCIO_VIS_Gallery_DB {
         return $wpdb->prefix . self::TABLE_PHOTO;
     }
 
+    /**
+     * Register gallery tables with the core change-history service.
+     *
+     * @param array<string,array> $tables Existing history table definitions.
+     * @return array<string,array>
+     */
+    public static function register_history_tables( array $tables ): array {
+        $tables['gallery_galleries'] = [
+            'table'     => self::TABLE_GALLERY,
+            'label'     => __( 'Gallery', 'pcio-vis-gallery' ),
+            'title_col' => 'title',
+            'weight'    => 6,
+            'large'     => [ 'description' ],
+            'fields'    => [
+                'event_id'             => __( 'Event', 'pcio-vis-gallery' ),
+                'title'                => __( 'Title', 'pcio-vis-gallery' ),
+                'description'          => __( 'Description', 'pcio-vis-gallery' ),
+                'cover_attachment_id'  => __( 'Cover image', 'pcio-vis-gallery' ),
+                'visibility'           => __( 'Visibility', 'pcio-vis-gallery' ),
+                'visibility_roles'     => __( 'Visibility roles', 'pcio-vis-gallery' ),
+            ],
+            'ignore'    => [ 'created', 'updated' ],
+            'links'     => static function ( array $row ): array {
+                return [ 'event_id' => (int) ( $row['event_id'] ?? 0 ) ];
+            },
+        ];
+
+        $tables['gallery_photos'] = [
+            'table'     => self::TABLE_PHOTO,
+            'label'     => __( 'Gallery photo', 'pcio-vis-gallery' ),
+            'title'     => [ self::class, 'history_photo_title' ],
+            'weight'    => 3,
+            'fields'    => [
+                'gallery_id'           => __( 'Gallery', 'pcio-vis-gallery' ),
+                'attachment_id'        => __( 'Attachment', 'pcio-vis-gallery' ),
+                'poster_attachment_id' => __( 'Poster image', 'pcio-vis-gallery' ),
+                'caption'              => __( 'Caption', 'pcio-vis-gallery' ),
+                'sort_order'           => __( 'Sort order', 'pcio-vis-gallery' ),
+                'uploaded_by'          => __( 'Uploaded by', 'pcio-vis-gallery' ),
+                'status'               => __( 'Status', 'pcio-vis-gallery' ),
+            ],
+            'ignore'    => [ 'created', 'updated' ],
+            'links'     => static function ( array $row ): array {
+                return self::history_photo_links( $row );
+            },
+        ];
+
+        return $tables;
+    }
+
     // ── Schema ────────────────────────────────────────────────────
 
     public static function install(): void {
@@ -156,7 +206,7 @@ class PCIO_VIS_Gallery_DB {
     /** @return int|false */
     public static function create( array $data ) {
         global $wpdb;
-        $result = $wpdb->insert( self::table_gallery(), self::sanitize_gallery( $data ) );
+        $result = PCIO_VIS_History::insert( 'gallery_galleries', self::sanitize_gallery( $data ) );
         if ( ! $result ) {
             return false;
         }
@@ -166,8 +216,7 @@ class PCIO_VIS_Gallery_DB {
     }
 
     public static function update( int $id, array $data ): bool {
-        global $wpdb;
-        $ok = false !== $wpdb->update( self::table_gallery(), self::sanitize_gallery( $data ), [ 'id' => $id ] );
+        $ok = false !== PCIO_VIS_History::update( 'gallery_galleries', self::sanitize_gallery( $data ), [ 'id' => $id ] );
         if ( $ok ) {
             do_action( 'pcio_me_gallery_saved', $id, $data );
         }
@@ -176,9 +225,13 @@ class PCIO_VIS_Gallery_DB {
 
     /** Deletes a gallery and all its photo rows (attachments are left intact). */
     public static function delete( int $id ): bool {
-        global $wpdb;
-        $wpdb->delete( self::table_photo(), [ 'gallery_id' => $id ], [ '%d' ] );
-        $ok = (bool) $wpdb->delete( self::table_gallery(), [ 'id' => $id ], [ '%d' ] );
+        $gallery = self::get_raw_gallery( $id );
+        $links   = $gallery ? [ 'event_id' => (int) ( $gallery['event_id'] ?? 0 ) ] : [];
+
+        PCIO_VIS_History::begin( '', $links );
+        PCIO_VIS_History::delete( 'gallery_photos', [ 'gallery_id' => $id ], [ '%d' ] );
+        $ok = (bool) PCIO_VIS_History::delete( 'gallery_galleries', [ 'id' => $id ], [ '%d' ] );
+        PCIO_VIS_History::commit();
         if ( $ok ) {
             do_action( 'pcio_me_gallery_deleted', $id );
         }
@@ -262,18 +315,16 @@ class PCIO_VIS_Gallery_DB {
         if ( ! isset( $data['sort_order'] ) ) {
             $row['sort_order'] = $next;
         }
-        $result = $wpdb->insert( self::table_photo(), $row );
+        $result = PCIO_VIS_History::insert( 'gallery_photos', $row );
         return $result ? (int) $wpdb->insert_id : false;
     }
 
     public static function update_photo( int $id, array $data ): bool {
-        global $wpdb;
-        return false !== $wpdb->update( self::table_photo(), self::sanitize_photo( $data ), [ 'id' => $id ] );
+        return false !== PCIO_VIS_History::update( 'gallery_photos', self::sanitize_photo( $data ), [ 'id' => $id ] );
     }
 
     public static function delete_photo( int $id ): bool {
-        global $wpdb;
-        return (bool) $wpdb->delete( self::table_photo(), [ 'id' => $id ], [ '%d' ] );
+        return (bool) PCIO_VIS_History::delete( 'gallery_photos', [ 'id' => $id ], [ '%d' ] );
     }
 
     /**
@@ -283,11 +334,14 @@ class PCIO_VIS_Gallery_DB {
      * @param int[] $photo_ids  Photo IDs in the desired display order.
      */
     public static function reorder_photos( int $gallery_id, array $photo_ids ): void {
-        global $wpdb;
         $order = 0;
+        PCIO_VIS_History::begin(
+            __( 'Reorder gallery photos', 'pcio-vis-gallery' ),
+            self::history_gallery_links( $gallery_id )
+        );
         foreach ( $photo_ids as $pid ) {
-            $wpdb->update(
-                self::table_photo(),
+            PCIO_VIS_History::update(
+                'gallery_photos',
                 [ 'sort_order' => $order ],
                 [ 'id' => (int) $pid, 'gallery_id' => $gallery_id ],
                 [ '%d' ],
@@ -295,6 +349,7 @@ class PCIO_VIS_Gallery_DB {
             );
             ++$order;
         }
+        PCIO_VIS_History::commit();
     }
 
     // ── Internal helpers ──────────────────────────────────────────
@@ -356,6 +411,63 @@ class PCIO_VIS_Gallery_DB {
             $out['poster_attachment_id'] = $pid ?: null;
         }
         return $out;
+    }
+
+    /**
+     * Build a history title for a photo row.
+     *
+     * @param array $row Raw photo row.
+     */
+    public static function history_photo_title( array $row ): string {
+        $caption = trim( (string) ( $row['caption'] ?? '' ) );
+        if ( '' !== $caption ) {
+            return $caption;
+        }
+
+        $attachment_id = (int) ( $row['attachment_id'] ?? 0 );
+        if ( $attachment_id > 0 ) {
+            $title = get_the_title( $attachment_id );
+            if ( '' !== (string) $title ) {
+                return (string) $title;
+            }
+        }
+
+        return __( 'Gallery photo', 'pcio-vis-gallery' );
+    }
+
+    /**
+     * Resolve history links for a photo row through its parent gallery.
+     *
+     * @param array $row Raw photo row.
+     * @return array{event_id?:int}
+     */
+    public static function history_photo_links( array $row ): array {
+        return self::history_gallery_links( (int) ( $row['gallery_id'] ?? 0 ) );
+    }
+
+    /**
+     * Resolve history links for a gallery.
+     *
+     * @param int $gallery_id Gallery ID.
+     * @return array{event_id?:int}
+     */
+    private static function history_gallery_links( int $gallery_id ): array {
+        $gallery = $gallery_id > 0 ? self::get_raw_gallery( $gallery_id ) : null;
+        return $gallery ? [ 'event_id' => (int) ( $gallery['event_id'] ?? 0 ) ] : [];
+    }
+
+    /**
+     * Raw gallery row used internally by history registration.
+     *
+     * @param int $id Gallery ID.
+     */
+    private static function get_raw_gallery( int $id ): ?array {
+        global $wpdb;
+        $row = $wpdb->get_row(
+            $wpdb->prepare( 'SELECT * FROM %i WHERE `id` = %d', self::table_gallery(), $id ),
+            ARRAY_A
+        );
+        return $row ?: null;
     }
 
     /**
