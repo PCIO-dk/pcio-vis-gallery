@@ -8,7 +8,7 @@ Requires at least: 6.2
 Tested up to:      7.1
 Requires PHP:      8.1
 Requires Plugins:  pcio-vis-member-event
-Stable tag:        1.1.0
+Stable tag:        1.2.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,6 +47,9 @@ Use the `[pcio_me_gallery id="N"]` shortcode, or browse all galleries at `/vis/g
 Requires PCIO VIS Member Event 1.6 or later.
 
 == Changelog ==
+
+= 1.2.0 =
+* Minor script change
 
 = 1.1.0 =
 * Added: **Change history with undo** — all writes to Vis tables are logged in the new `me_change_history` table, with undo data in `me_change_undo`. A new **Vis → History** admin page lists every change with filters and an Undo button, guarded by the new `vis_undo_changes` capability (granted to System Admin).

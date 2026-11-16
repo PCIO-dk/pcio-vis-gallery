@@ -121,7 +121,7 @@
                         '<input type="search" id="meg-global-search" placeholder="' + escAttr( T.searchPh ) + '" autocomplete="off">' +
                     '</div>' +
                 '</div>' +
-                '<table id="me-table">' +
+                '<table id="me-table" class="me-data-table">' +
                     '<thead>' +
                         '<tr class="me-head-row" id="meg-head-row"></tr>' +
                         '<tr class="me-filter-row" id="meg-filter-row"></tr>' +
